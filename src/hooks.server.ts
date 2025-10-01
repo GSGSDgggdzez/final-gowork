@@ -18,8 +18,9 @@ export async function handle({ event, resolve }) {
 		event.locals.user = event.locals.pb.authStore.record
 			? (serializeNonPOJOs(event.locals.pb.authStore.record) as AuthRecord)
 			: undefined;
-	} catch {
+	} catch (err) {
 		// clear the auth store on failed refresh
+		console.error('Auth refresh failed:', err);
 		event.locals.pb.authStore.clear();
 		event.locals.user = undefined;
 	}
