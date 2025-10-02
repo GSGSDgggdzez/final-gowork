@@ -165,7 +165,12 @@ export const actions = {
 			};
 
 			const record = await locals.pb.collection('users').create(userData);
-			await locals.pb.collection('users').requestVerification(result.data.email);
+			try {
+				await locals.pb.collection('users').requestVerification(result.data.email);
+			} catch (e) {
+				console.error('Email verification dispatch failed for user', record.id);
+				// proceed without failing the whole registration
+			}
 
 			return {
 				success: true,
