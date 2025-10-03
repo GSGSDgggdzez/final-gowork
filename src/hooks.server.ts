@@ -25,7 +25,7 @@ export async function handle({ event, resolve }) {
 		event.locals.user = undefined;
 	}
 
-	// todo Set proper middleware 
+	// todo Set proper middleware
 	const response = await resolve(event);
 
 	// send back the default 'pb_auth' cookie to the client with the latest store state

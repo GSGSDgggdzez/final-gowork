@@ -38,6 +38,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"@upstash/redis": "^1.35.4",
 		"pocketbase": "^0.26.2",
 		"twilio": "^5.10.2",
 		"zod-form-data": "^3.0.1"
