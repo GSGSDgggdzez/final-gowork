@@ -2,17 +2,18 @@ import { zfd } from 'zod-form-data';
 import { z } from 'zod';
 import { fail } from '@sveltejs/kit';
 import { checkPhoneVerification, startPhoneVerification } from '$lib/server/phone_verification.js';
+import { checkRateLimit } from '$lib/server/redis.js';
 
 /**
  * FRONTEND DEVELOPER GUIDE - SIGNUP WITH PHONE VERIFICATION
  * ==========================================================
- * 
+ *
  * This implements a 2-step registration flow with phone verification via Twilio SMS.
- * 
+ *
  * STEP 1: Initial Registration Form Submission
  * ---------------------------------------------
  * Action: ?/register
- * 
+ *
  * Form fields to include:
  * - username (min 4 chars)
  * - email (valid email)
@@ -21,54 +22,59 @@ import { checkPhoneVerification, startPhoneVerification } from '$lib/server/phon
  * - firstName (min 4 chars)
  * - lastName (min 4 chars)
  * - address (min 4 chars)
- * - phonenumber (9 digits, must start with 7, 8, or 9) and should have the country code added
- * - profile (File)
+ * - phonenumber (9 digits, must start with 7, 8, or 9)
+ * - countryCode (e.g., "+251" for Ethiopia, "+1" for USA, "+44" for UK)
+ * - role ('buyer' or 'provider')
+ * - profile (File - max 5MB, only jpg/png/webp)
  * - country (optional, defaults to 'Ethiopia')
- * 
+ *
  * Response on success:
  * {
  *   success: false,
  *   otpSent: true,
  *   message: "A one-time password has been sent...",
- *   phone: "912345678",
- *   data: {...all form fields}
+ *   phone: "912345678"
  * }
- * 
+ *
  * What to do:
- * 1. Keep all form data in state
+ * 1. Keep all form data in state (including countryCode)
  * 2. Show OTP input field
  * 3. Display message to user
- * 
+ *
  * STEP 2: OTP Verification & Account Creation
  * --------------------------------------------
  * Action: ?/verify
- * 
+ *
  * Form fields to include:
  * - otp (6 digits from SMS)
- * - ALL fields from step 1 (username, email, password, etc.)
- * 
+ * - ALL fields from step 1 (username, email, password, phonenumber, countryCode, etc.)
+ *
  * Response on success:
  * {
  *   success: true,
  *   message: "Registration successful! Please check your email...",
  *   userId: "abc123"
  * }
- * 
+ *
  * What to do:
  * 1. Redirect to login or dashboard
  * 2. Show success message
- * 
+ *
  * ERROR HANDLING:
  * ---------------
  * Both actions return fail() with:
  * - error: string (error message to display)
- * - data: {...} (form data to repopulate form)
  * - errors: {...} (Zod validation errors, if applicable)
- * 
+ *
+ * Rate Limiting:
+ * - 3 OTP requests per 10 minutes per phone number
+ * - 5 verification attempts per 15 minutes per phone number
+ * - Returns 429 status with error message when limit exceeded
+ *
  * Example frontend flow:
- * 1. User fills registration form → Submit to ?/register
- * 2. If otpSent === true → Show OTP input, keep form data
- * 3. User enters OTP → Submit to ?/verify with OTP + all original form data
+ * 1. User selects country (+251) and fills registration form → Submit to ?/register
+ * 2. If otpSent === true → Show OTP input, keep ALL form data including countryCode
+ * 3. User enters OTP → Submit to ?/verify with OTP + countryCode + all original form data
  * 4. If success === true → Redirect to login
  */
 
@@ -79,7 +85,7 @@ export async function load() {
 
 export const actions = {
 	// STEP 2: Verify OTP and create user account
-	verify: async ({ request, locals }) => {
+	verify: async ({ request, locals, getClientAddress }) => {
 		try {
 			const formData = await request.formData();
 
@@ -118,35 +124,61 @@ export const actions = {
 							message: 'Phone number must start with 7, 8, or 9'
 						})
 				),
+				countryCode: zfd.text(
+					z.string().regex(/^\+\d{1,4}$/, { message: 'Country code must be in format +XXX' })
+				),
 				role: zfd.text(z.enum(['buyer', 'provider'])),
-				country: zfd.text(z.string().optional().default('Ethiopia'))
+				country: zfd.text(z.string().default('Cameroon'))
 			});
 
 			const result = verifySchema.safeParse(formData);
 			if (!result.success) {
 				return fail(400, {
-					data: Object.fromEntries(formData),
 					errors: z.treeifyError(result.error)
 				});
 			}
 
-			const { otp, phonenumber, password, passwordConfirm } = result.data;
+			const { otp, phonenumber, password, passwordConfirm, countryCode } = result.data;
 
 			if (password !== passwordConfirm) {
 				return fail(400, {
-					error: 'Passwords do not match',
-					data: Object.fromEntries(formData)
+					error: 'Passwords do not match'
 				});
 			}
 
-			// Verify OTP with Twilio (format: +251XXXXXXXXX)
-			const verificationResult = await checkPhoneVerification(`+251${phonenumber}`, otp);
+			// Rate limit OTP verification attempts (5 attempts per 15 minutes per phone)
+			const clientIp = getClientAddress();
+			const canProceed = await checkRateLimit(`verify:${phonenumber}:${clientIp}`, 5, 15 * 60);
+
+			if (!canProceed) {
+				return fail(429, {
+					error: 'Too many verification attempts. Please try again in 15 minutes.'
+				});
+			}
+
+			// Use country code provided by frontend
+			const formattedPhone = `${countryCode}${phonenumber}`;
+			const verificationResult = await checkPhoneVerification(formattedPhone, otp);
 
 			if (!verificationResult.success) {
 				return fail(400, {
-					error: verificationResult.message,
-					data: Object.fromEntries(formData)
+					error: verificationResult.message
 				});
+			}
+
+			// Check if email or username already exists
+			try {
+				const existingUsers = await locals.pb.collection('users').getList(1, 1, {
+					filter: `email = "${result.data.email}" || username = "${result.data.username}"`
+				});
+
+				if (existingUsers.items.length > 0) {
+					return fail(400, {
+						error: 'Email or username already exists'
+					});
+				}
+			} catch {
+				// Continue if check fails (PocketBase will catch duplicate on create)
 			}
 
 			// Create user in PocketBase
@@ -165,11 +197,11 @@ export const actions = {
 			};
 
 			const record = await locals.pb.collection('users').create(userData);
+
 			try {
 				await locals.pb.collection('users').requestVerification(result.data.email);
-			} catch (e) {
+			} catch {
 				console.error('Email verification dispatch failed for user', record.id);
-				// proceed without failing the whole registration
 			}
 
 			return {
@@ -177,8 +209,17 @@ export const actions = {
 				message: 'Registration successful! Please check your email to verify your account.',
 				userId: record.id
 			};
-		} catch (err) {
+		} catch (err: unknown) {
 			console.error('PocketBase user creation error:', err);
+
+			// Handle duplicate email/username
+			const error = err as { data?: { email?: unknown; username?: unknown } };
+			if (error?.data?.email || error?.data?.username) {
+				return fail(400, {
+					error: 'Email or username already exists'
+				});
+			}
+
 			return fail(500, {
 				error: 'Failed to create account. Please try again or contact support.'
 			});
@@ -186,7 +227,7 @@ export const actions = {
 	},
 
 	// STEP 1: Validate form and send OTP to phone
-	register: async ({ request }) => {
+	register: async ({ request, getClientAddress }) => {
 		try {
 			const formData = await request.formData();
 
@@ -218,29 +259,50 @@ export const actions = {
 							message: 'Phone number must start with 7, 8, or 9'
 						})
 				),
+				countryCode: zfd.text(
+					z.string().regex(/^\+\d{1,4}$/, { message: 'Country code must be in format +XXX' })
+				),
 				role: zfd.text(z.enum(['buyer', 'provider'])),
-				profile: zfd.file(z.instanceof(File))
+				profile: zfd.file(
+					z
+						.instanceof(File)
+						.refine((file) => file.size <= 5 * 1024 * 1024, {
+							message: 'File size must be less than 5MB'
+						})
+						.refine((file) => ['image/jpeg', 'image/png', 'image/webp'].includes(file.type), {
+							message: 'Only JPG, PNG, and WEBP images are allowed'
+						})
+				)
 			});
 
 			const result = registerSchema.safeParse(formData);
 			if (!result.success) {
 				return fail(400, {
-					data: Object.fromEntries(formData),
 					errors: z.treeifyError(result.error)
 				});
 			}
 
-			const { password, passwordConfirm, phonenumber } = result.data;
+			const { password, passwordConfirm, phonenumber, countryCode } = result.data;
 
 			if (password !== passwordConfirm) {
 				return fail(400, {
-					error: 'Passwords do not match',
-					data: Object.fromEntries(formData)
+					error: 'Passwords do not match'
 				});
 			}
 
-			// Send OTP via Twilio (format: +251XXXXXXXXX)
-			const phoneVerification = await startPhoneVerification(phonenumber);
+			// Rate limit OTP requests (3 requests per 10 minutes per phone)
+			const clientIp = getClientAddress();
+			const canProceed = await checkRateLimit(`register:${phonenumber}:${clientIp}`, 3, 10 * 60);
+
+			if (!canProceed) {
+				return fail(429, {
+					error: 'Too many OTP requests. Please try again in 10 minutes.'
+				});
+			}
+
+			// Use country code provided by frontend
+			const formattedPhone = `${countryCode}${phonenumber}`;
+			const phoneVerification = await startPhoneVerification(formattedPhone);
 
 			if (phoneVerification.success) {
 				return {
@@ -248,13 +310,11 @@ export const actions = {
 					otpSent: true,
 					message:
 						'A one-time password has been sent to your phone. Please enter it to complete registration.',
-					phone: phonenumber,
-					data: Object.fromEntries(formData)
+					phone: phonenumber
 				};
 			} else {
 				return fail(400, {
-					error: 'Phone verification failed. Please check your phone number and try again.',
-					data: Object.fromEntries(formData)
+					error: 'Phone verification failed. Please check your phone number and try again.'
 				});
 			}
 		} catch (err) {

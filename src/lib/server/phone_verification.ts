@@ -28,7 +28,6 @@ export async function startPhoneVerification(
 			.services(TWILIO_VERIFY_SERVICE_SID)
 			.verifications.create({ to: phoneNumber, channel: 'sms' });
 
-
 		return {
 			success: true,
 			message: 'Verification code sent to your phone',
@@ -62,8 +61,6 @@ export async function checkPhoneVerification(
 		const verificationCheck = await client.verify.v2
 			.services(TWILIO_VERIFY_SERVICE_SID)
 			.verificationChecks.create({ to: phoneNumber, code: code });
-
-
 
 		if (verificationCheck.status === 'approved') {
 			return {
