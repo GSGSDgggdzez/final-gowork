@@ -120,9 +120,6 @@ export const actions = {
 					z
 						.string()
 						.regex(/^\d{9}$/, { message: 'Phone number must be 9 digits long' })
-						.refine((val) => val.startsWith('7') || val.startsWith('8') || val.startsWith('9'), {
-							message: 'Phone number must start with 7, 8, or 9'
-						})
 				),
 				countryCode: zfd.text(
 					z.string().regex(/^\+\d{1,4}$/, { message: 'Country code must be in format +XXX' })
@@ -255,9 +252,7 @@ export const actions = {
 					z
 						.string()
 						.regex(/^\d{9}$/, { message: 'Phone number must be 9 digits long' })
-						.refine((val) => val.startsWith('7') || val.startsWith('8') || val.startsWith('9'), {
-							message: 'Phone number must start with 7, 8, or 9'
-						})
+
 				),
 				countryCode: zfd.text(
 					z.string().regex(/^\+\d{1,4}$/, { message: 'Country code must be in format +XXX' })
