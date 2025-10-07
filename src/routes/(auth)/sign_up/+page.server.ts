@@ -22,7 +22,7 @@ import { checkRateLimit } from '$lib/server/redis.js';
  * - firstName (min 4 chars)
  * - lastName (min 4 chars)
  * - address (min 4 chars)
- * - phonenumber (9 digits, must start with 7, 8, or 9)
+ * - phonenumber (9 digits)
  * - countryCode (e.g., "+251" for Ethiopia, "+1" for USA, "+44" for UK)
  * - role ('buyer' or 'provider')
  * - profile (File - max 5MB, only jpg/png/webp)
