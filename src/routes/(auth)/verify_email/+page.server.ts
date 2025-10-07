@@ -43,6 +43,7 @@ import { fail, redirect } from '@sveltejs/kit';
  * /src/routes/(auth)/verify_email/[token]/+page.server.ts
  */
 
+// Move this file to: src/routes/(auth)/verify_email/[token]/+page.server.ts
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ params, locals }) {
 	const token = params.token;
@@ -55,23 +56,18 @@ export async function load({ params, locals }) {
 
 	try {
 		await locals.pb.collection('users').confirmVerification(token);
-
 		throw redirect(303, '/login?verified=true');
 	} catch (err) {
 		if (err instanceof Response && err.status === 303) {
 			throw err;
 		}
-
 		console.error('Email verification error:', err);
-
 		const error = err as { status?: number; message?: string };
-
 		if (error?.status === 400 || error?.status === 404) {
 			return fail(400, {
 				error: 'Invalid or expired verification token. Please request a new verification email.'
 			});
 		}
-
 		return fail(500, {
 			error: 'Email verification failed. Please try again or contact support.'
 		});
