@@ -55,48 +55,46 @@ export async function load() {
 }
 
 export const actions = {
-        confirmPasswordReset: async ({ request, locals }) => {
-            try {
-                const formData = await request.formData();
+  confirmPasswordReset: async ({ request, locals }) => {
+    try {
+      const formData = await request.formData();
 
-                const confirmPasswordResetSchema = zfd.formData({
-                    password: zfd.text(z.string().min(8, { message: 'Password must be between 8 and 100 characters' }).max(100)),
-                    confirmPassword: zfd.text(z.string().min(8, { message: 'Please confirm your password' }).max(100)),
-                    token: zfd.text(z.string())
-                });
+      const confirmPasswordResetSchema = zfd.formData({
+        password: zfd.text(z.string().min(8, { message: 'Password must be between 8 and 100 characters' }).max(100)),
+        confirmPassword: zfd.text(z.string().min(8, { message: 'Please confirm your password' }).max(100)),
+        token: zfd.text(z.string())
+      });
 
-                const result = confirmPasswordResetSchema.safeParse(formData);
-                if (!result.success) {
-                    return fail(400, {
-                        errors: z.treeifyError(result.error)
-                    });
-                }
+      const result = confirmPasswordResetSchema.safeParse(formData);
+      if (!result.success) {
+        return fail(400, {
+          errors: z.treeifyError(result.error)
+        });
+      }
 
-                const { password, confirmPassword, token } = result.data;
+      const { password, confirmPassword, token } = result.data;
+      if (password !== confirmPassword) {
+        return fail(400, { error: 'Passwords do not match' });
+      }
 
-                if (password !== confirmPassword) {
-                    return fail(400, {
-                        error: 'Passwords do not match'
-                    });
-                }
+      try {
+        await locals.pb.collection('users').confirmPasswordReset(token, password, confirmPassword);
+      } catch (e) {
+        const err = e as { status?: number; message?: string };
+        if (err?.status === 400 || err?.status === 404) {
+          return fail(400, { error: 'Invalid or expired reset token. Please request a new password reset link.' });
+        }
+        return fail(500, { error: 'Password reset failed. Please try again.' });
+      }
 
-                // Proceed with password reset logic
-                await locals.pb.collection('users').confirmPasswordReset(token, password, confirmPassword);
-
-                return {
-                    success: true,
-                    message: 'Your password has been reset successfully'
-                };
-            } catch (err) {
-                if (err instanceof Response && err.status === 303) {
-                    throw err;
-                }
-
-                console.error('Unexpected error:', err);
-                return fail(500, {
-                    error: 'An unexpected error occurred. Please try again.'
-                });
-            }
-        }   
-}
+      throw redirect(303, '/login?reset=success');
+    } catch (err) {
+      if (err instanceof Response && err.status === 303) {
+        throw err;
+      }
+      console.error('Unexpected error:', err);
+      return fail(500, { error: 'An unexpected error occurred. Please try again.' });
+    }
+  }
+};
 
