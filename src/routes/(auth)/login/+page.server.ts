@@ -59,29 +59,20 @@ export const actions = {
 			const { email, password } = result.data;
 
 			try {
-				await locals.pb.collection('users').authWithPassword(email, password);
+			  await locals.pb.collection('users').authWithPassword(email, password);
 			} catch (err: unknown) {
-				console.error('Login error:', err);
-
-				const error = err as { status?: number; message?: string };
-
-				if (error?.status === 400) {
-					return fail(400, {
-						error: 'Invalid email or password'
-					});
-				}
-
-				return fail(500, {
-					error: 'An error occurred during login. Please try again.'
-				});
+			  console.error('Login error:', err);
+			  // Normalize to prevent user enumeration
+			  return fail(400, { error: 'Invalid email or password' });
 			}
 
 			if (!locals.pb.authStore.record?.verified) {
-				locals.pb.authStore.clear();
-				return fail(400, {
-					error: 'Please verify your email before logging in. Check your inbox for the verification link.'
-				});
+			  // Clear and normalize response to avoid leaking existence
+			  locals.pb.authStore.clear();
+			  return fail(400, { error: 'Invalid email or password' });
 			}
+
+			throw redirect(303, '/');
 
 			throw redirect(303, '/');
 		} catch (err) {
