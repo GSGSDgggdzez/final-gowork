@@ -167,14 +167,14 @@ export const actions = {
 			}
 
 			const providerData = {
-				user_id: user.id,
-				bio: result.data.bio,
-				current_geolocation: JSON.parse(result.data.current_geolocation),
-				languages: result.data.languages,
-				availability: result.data.availability,
-				content: result.data.content,
-				rating: 0,
-				total_review: 0
+			  user_id: user.id,
+			  bio: result.data.bio,
+			  current_geolocation: JSON.parse(result.data.current_geolocation),
+			  languages: JSON.parse(result.data.languages),
+			  availability: JSON.parse(result.data.availability),
+			  content: result.data.content,
+			  rating: 0,
+			  total_review: 0
 			};
 
 			await locals.pb.collection('provider_profiles').create(providerData);
