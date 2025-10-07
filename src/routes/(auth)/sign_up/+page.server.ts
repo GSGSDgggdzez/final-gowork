@@ -252,6 +252,7 @@ export const actions = {
 					z
 						.string()
 						.regex(/^\d{9}$/, { message: 'Phone number must be 9 digits long' })
+
 				),
 				countryCode: zfd.text(
 					z.string().regex(/^\+\d{1,4}$/, { message: 'Country code must be in format +XXX' })
