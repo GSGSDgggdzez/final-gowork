@@ -67,23 +67,17 @@ export const actions = {
             const { email } = result.data;
 
             try {
-                await locals.pb.collection('users').requestPasswordReset(email);
-
-            } catch (err : unknown) {
-                console.error('Forgot Password error:', err);
-
-                const error = err as { status?: number; message?: string };
-
-                if (error?.status === 400) {
-                    return fail(400, {
-                        error: 'If an account with that email exists, a password reset link has been sent.'
-                    });
-                }
-
-                return fail(500,{
-                    error: 'An error occurred while requesting password reset. Please try again.'
-                })
+              await locals.pb.collection('users').requestPasswordReset(email);
+            } catch (err: unknown) {
+              console.error('Forgot Password error:', err);
+              // Intentionally swallow specific errors to prevent email enumeration
+              // We still proceed to return the same success message below.
             }
+
+            return {
+              success: true,
+              message: 'If an account with that email exists, a password reset link has been sent.'
+            };
 
         }catch (err) {
             if (err instanceof Response && err.status === 303) {
