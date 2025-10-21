@@ -38,9 +38,6 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"@fortawesome/fontawesome-svg-core": "^7.1.0",
-		"@fortawesome/free-brands-svg-icons": "^7.1.0",
-		"@fortawesome/free-solid-svg-icons": "^7.1.0",
 		"@upstash/redis": "^1.35.4",
 		"pocketbase": "^0.26.2",
 		"twilio": "^5.10.2",
