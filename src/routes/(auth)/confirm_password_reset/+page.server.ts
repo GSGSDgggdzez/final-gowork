@@ -1,6 +1,6 @@
 import { zfd } from 'zod-form-data';
 import { z } from 'zod';
-import { fail } from '@sveltejs/kit';
+import { fail,redirect } from '@sveltejs/kit';
 
 /**
  * FRONTEND DEVELOPER GUIDE - CONFIRM PASSWORD RESET

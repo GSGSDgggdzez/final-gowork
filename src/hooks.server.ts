@@ -1,4 +1,37 @@
-// src/hooks.server.ts
+/**
+ * HOOKS.SERVER.TS - Authentication & Global Middleware
+ * =====================================================
+ * 
+ * This file handles PocketBase authentication for the entire application.
+ * It runs on every request before any +page.server.ts or +server.ts files.
+ * 
+ * AUTHENTICATION FLOW:
+ * --------------------
+ * 1. Reads pb_auth cookie from incoming request
+ * 2. Loads auth state into PocketBase client
+ * 3. Validates and refreshes token if needed
+ * 4. Stores user in locals.user (available to all routes)
+ * 5. Returns updated cookie to client
+ * 
+ * AVAILABLE IN ALL ROUTES:
+ * ------------------------
+ * - locals.pb: PocketBase client instance
+ * - locals.user: Current authenticated user (or undefined)
+ * 
+ * STREAM CHAT INTEGRATION:
+ * ------------------------
+ * Stream Chat authentication is handled separately via /api/stream/token
+ * after PocketBase authentication is confirmed. The token endpoint uses
+ * locals.pb.authStore.record to get the current user.
+ * 
+ * Frontend flow:
+ * 1. User logs in → PocketBase sets pb_auth cookie
+ * 2. Every request → This hook validates pb_auth
+ * 3. User data available in locals.user for all routes
+ * 4. Frontend fetches Stream token from /api/stream/token
+ * 5. Frontend connects to Stream Chat with token
+ */
+
 import PocketBase, { type AuthRecord } from 'pocketbase';
 import { serializeNonPOJOs } from '$lib';
 import { PUBLIC_pocketbase_URL } from '$env/static/public';

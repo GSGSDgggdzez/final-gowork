@@ -47,7 +47,7 @@ import { fail, redirect } from '@sveltejs/kit';
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ params, locals }) {
 	const token = params.token;
-
+	
 	if (!token) {
 		return fail(400, {
 			error: 'Missing verification token. Please check your email for the correct link.'

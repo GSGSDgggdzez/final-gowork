@@ -176,6 +176,7 @@ export const actions = {
 				}
 			} catch {
 				// Continue if check fails (PocketBase will catch duplicate on create)
+				// No action needed
 			}
 
 			// Create user in PocketBase

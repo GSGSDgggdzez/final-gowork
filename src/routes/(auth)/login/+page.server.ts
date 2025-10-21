@@ -74,7 +74,6 @@ export const actions = {
 
 			throw redirect(303, '/');
 
-			throw redirect(303, '/');
 		} catch (err) {
 			if (err instanceof Response && err.status === 303) {
 				throw err;

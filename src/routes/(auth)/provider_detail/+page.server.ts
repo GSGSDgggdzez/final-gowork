@@ -9,17 +9,25 @@ import { fail, redirect } from '@sveltejs/kit';
  * This page allows already-registered users with 'provider' role to complete their provider profile.
  * The user must be authenticated before accessing this page.
  *
+ * PAGE DATA (Available from load function):
+ * -----------------------------------------
+ * - data.user - Current authenticated user (id, username, email)
+ * - data.skills - Array of all available skills from the skills collection
+ *   Example: [{ id: "abc123", name: "Plumbing", slug: "plumbing", created: "...", updated: "..." }, ...]
+ *
  * Action: ?/createProfile
  *
- * Form fields to include:
- * - bio (min 20 chars, max 500 chars) - Text area describing provider's services/expertise
- * - languages (JSON string array) - e.g., '["English", "Amharic", "French"]'
- * - availability (JSON object) - e.g., '{"monday": ["9:00-17:00"], "tuesday": ["9:00-17:00"]}'
- * - current_geolocation (JSON object) - e.g., '{"lon": 38.7469, "lat": 9.0054}'
- * - content (File) - Portfolio/certificate/work samples (max 10MB, jpg/png/pdf)
+ * Form fields to include (as multipart/form-data):
+ * - bio (String, REQUIRED) - Min 20 chars, max 500 chars. Text area describing provider's services/expertise
+ * - languages (String, OPTIONAL) - JSON array as string. e.g., '["English", "Amharic", "French"]'
+ * - services (String, REQUIRED) - JSON array of skill/category relation IDs. e.g., '["skill_id_1", "skill_id_2"]'
+ *   Must have at least one service. Use IDs from data.skills array.
+ * - availability (String, OPTIONAL) - JSON object as string. e.g., '{"monday": ["9:00-17:00"], "tuesday": ["9:00-17:00"]}'
+ * - current_geolocation (String, REQUIRED) - JSON object with lon/lat. e.g., '{"lon": 38.7469, "lat": 9.0054}'
+ * - content (File, REQUIRED) - Portfolio/certificate/work samples (max 10MB, jpg/png/pdf only)
  *
  * Response on success:
- * Redirects to provider dashboard
+ * Redirects to /provider/dashboard
  *
  * Response on error:
  * {
@@ -34,12 +42,17 @@ import { fail, redirect } from '@sveltejs/kit';
  * - The user_id is automatically taken from the authenticated user
  * - rating and total_review are automatically set to 0 (will be updated as provider gets reviews)
  * - Each provider can only create ONE profile (enforced by unique user_id constraint)
+ * - Use data.skills to populate a multi-select dropdown for the services field
+ * - services field is sent as Array<String> of relation record IDs to PocketBase
  *
- * EXAMPLE JSON VALUES:
- * --------------------
+ * EXAMPLE FORM DATA:
+ * ------------------
+ * bio: "Experienced plumber with 10 years of expertise in residential and commercial plumbing."
  * languages: '["English", "Amharic", "Tigrinya"]'
+ * services: '["abc123", "def456"]' (skill/category IDs from data.skills)
  * availability: '{"monday": ["9:00-12:00", "14:00-18:00"], "wednesday": ["10:00-16:00"], "friday": ["9:00-17:00"]}'
  * current_geolocation: '{"lon": 38.7469, "lat": 9.0054}'
+ * content: [File object]
  */
 
 /** @type {import('./$types').PageServerLoad} */
@@ -48,7 +61,7 @@ export async function load({ locals }) {
 		throw redirect(303, '/sign_in');
 	}
 
-	const user = locals.pb.authStore.model;
+	const user = locals.pb.authStore.record;
 	if (!user?.role?.includes('provider')) {
 		throw redirect(303, '/');
 	}
@@ -67,12 +80,18 @@ export async function load({ locals }) {
 		}
 	}
 
+	const skills = await locals.pb.collection('categories').getFullList({
+		sort: 'name'
+	});
+
+
 	return {
 		user: {
 			id: user.id,
 			username: user.username,
 			email: user.email
-		}
+		},
+		skills
 	};
 }
 
@@ -84,7 +103,7 @@ export const actions = {
 			});
 		}
 
-		const user = locals.pb.authStore.model;
+		const user = locals.pb.authStore.record;
 		if (!user?.role?.includes('provider')) {
 			return fail(403, {
 				error: 'Only users with provider role can create a provider profile'
@@ -112,6 +131,19 @@ export const actions = {
 							}
 						},
 						{ message: 'Languages must be a valid JSON array with at least one language' }
+					)
+				),
+				services: zfd.text(
+					z.string().refine(
+						(val) => {
+							try {
+								const parsed = JSON.parse(val);
+								return Array.isArray(parsed) && parsed.length > 0;
+							} catch {
+								return false;
+							}
+						},
+						{ message: 'services must be a valid JSON array with at least one service' }
 					)
 				),
 				availability: zfd.text(
@@ -172,6 +204,7 @@ export const actions = {
 			  current_geolocation: JSON.parse(result.data.current_geolocation),
 			  languages: JSON.parse(result.data.languages),
 			  availability: JSON.parse(result.data.availability),
+			  services: JSON.parse(result.data.services),
 			  content: result.data.content,
 			  rating: 0,
 			  total_review: 0
