@@ -23,6 +23,7 @@
 		"@tailwindcss/typography": "^0.5.15",
 		"@tailwindcss/vite": "^4.0.0",
 		"@types/node": "^22",
+		"daisyui": "^5.3.7",
 		"eslint": "^9.22.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
@@ -38,6 +39,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"@splidejs/svelte-splide": "^0.2.9",
 		"@upstash/redis": "^1.35.4",
 		"pocketbase": "^0.26.2",
 		"twilio": "^5.10.2",
