@@ -18,14 +18,13 @@
 	import frameImage1 from '$lib/assets/images/frame-1.png';
 	import frameImage2 from '$lib/assets/images/frame-2.png';
 
-	import AppPhoneMockup from '$lib/assets/images/app-phone-mockup.png';
-	import AppstoreLogo from '$lib/assets/images/appstore.png';
-	import PlaystoreLogo from '$lib/assets/images/playstore.png';
-
 	import ProfilesIcon from '$lib/assets/icons/profiles.svg';
 	import MindIcon from '$lib/assets/icons/mind.svg';
 	import PlatformIcon from '$lib/assets/icons/platform.svg';
 	import SupportIcon from '$lib/assets/icons/support.svg';
+	import PopularSearch from '$lib/components/shared/PopularSearch.svelte';
+	import Testimonials from '$lib/components/shared/Testimonials.svelte';
+	import MobileAppBanner from '$lib/components/shared/MobileAppBanner.svelte';
 
 	const categories = [
 		{ title: 'Plumbing', image: categoryImage1, link: '/' },
@@ -102,20 +101,9 @@
 			icon: SupportIcon
 		}
 	];
-
-	const popularSearches = [
-		{ keyword: 'Carpenter Brussels', link: '/' },
-		{ keyword: 'Handyman Brussels', link: '/' },
-		{ keyword: 'Painter Liege', link: '/' },
-		{ keyword: 'Plumber Namur', link: '/' },
-		{ keyword: 'Message Cork', link: '/' },
-		{ keyword: 'Moving to Brussels', link: '/' },
-		{ keyword: 'Electrician Charleroi', link: '/' },
-		{ keyword: 'Electrical Liege', link: '/' }
-	];
 </script>
 
-<main class="container mx-auto mt-24 bg-white">
+<main class="container mx-auto flex flex-col gap-24 bg-white">
 	<!-- Hero Section -->
 	<section
 		class="hero mt-34 flex w-full flex-col items-start justify-between gap-8 rounded-[20px] bg-[#EAF7EF] px-10 py-10 md:flex-row-reverse lg:items-center lg:gap-0"
@@ -154,7 +142,7 @@
 	</section>
 
 	<!-- Categories With Carousel Section -->
-	<section class="w-full bg-white px-10 py-20 sm:px-0">
+	<section class="w-full bg-white px-10 sm:px-0">
 		<Splide
 			options={{
 				rewind: true,
@@ -295,7 +283,7 @@
 
 	<!-- Request Service With Carousel Section -->
 	<section
-		class="mb-20 flex w-full flex-col-reverse items-start justify-between gap-8 rounded-[20px] bg-[#FEFAEE] px-10 py-14 lg:flex-row lg:items-center lg:gap-0"
+		class="flex w-full flex-col-reverse items-start justify-between gap-8 rounded-[20px] bg-[#FEFAEE] px-10 py-14 lg:flex-row lg:items-center lg:gap-0"
 	>
 		<div>
 			<h2 class="leading-12 font-[Roboto] text-4xl font-bold text-[#333333]">
@@ -465,9 +453,7 @@
 	</section>
 
 	<!-- Service Provider Section -->
-	<section
-		class="my-20 mb-20 flex w-full flex-col-reverse items-center justify-between gap-9 lg:flex-row"
-	>
+	<section class="flex w-full flex-col-reverse items-center justify-between gap-9 lg:flex-row">
 		<div
 			class="flex h-auto w-full flex-col justify-center gap-4 rounded-[20px] bg-[#EAF7EF] px-10 py-14 lg:h-[600px] lg:w-[50%]"
 		>
@@ -517,7 +503,7 @@
 
 	<!-- How It Works Section -->
 	<section
-		class="pt-34 flex w-full flex-col items-center justify-between gap-14 rounded-[20px] bg-[#FEFAEE] px-10 pb-14 lg:flex-row"
+		class="flex w-full flex-col items-center justify-between gap-14 rounded-[20px] bg-[#FEFAEE] px-10 py-14 lg:flex-row"
 	>
 		<div class="w-full lg:w-[40%]">
 			<img src={frameImage2} class="w-full" alt="" />
@@ -543,231 +529,11 @@
 	</section>
 
 	<!-- Testemonials Section -->
-	<section
-		class="relative mt-20 flex w-full flex-row items-center gap-0 rounded-none bg-[white] py-20 lg:overflow-hidden lg:rounded-[200px]"
-	>
-		<div
-			class="z-10 ml-0 flex h-auto w-full flex-row items-center justify-center rounded-none bg-white lg:-ml-10 lg:h-[450px] lg:w-[500px] lg:justify-normal lg:rounded-l-[200px] lg:rounded-r-full lg:bg-[#FEFAEE]"
-		>
-			<div
-				class="absolute h-auto w-[450px] rounded-none bg-white lg:h-[450px] lg:rounded-l-[200px] lg:rounded-r-full lg:bg-[#FCEFCB]"
-			></div>
-			<div class="z-100">
-				<Splide
-					options={{
-						rewind: true,
-						autoplay: true,
-						type: 'loop',
-						pagination: false,
-						perPage: 1,
-						perMove: 1,
-						breakpoints: {
-							1024: {
-								width: '450px'
-							}
-						},
-						speed: 1200,
-						flickMaxPages: 1,
-						arrows: true,
-						gap: '30px',
-						width: '28%'
-					}}
-					hasTrack={false}
-				>
-					<div
-						class="flex flex-col-reverse justify-center gap-0 px-0 lg:flex-row lg:justify-between lg:gap-0 lg:pl-60 lg:pr-10"
-					>
-						<SplideTrack>
-							<SplideSlide>
-								<div
-									class="flex w-[450px] flex-col flex-wrap gap-3 rounded-none bg-white p-10 shadow-[rgba(0,0,0,0.05)] lg:w-[600px] lg:rounded-xl"
-								>
-									<div class="flex flex-row gap-3.5">
-										<div class="avatar">
-											<div class="w-20 rounded-full">
-												<img
-													src="https://img.daisyui.com/images/profile/demo/superperson@192.webp"
-													alt="Tailwind-CSS-Avatar-component"
-												/>
-											</div>
-										</div>
-										<div class="flex flex-col gap-1">
-											<h6 class="font-[Roboto] text-2xl font-extrabold text-[#2AAE5C]">
-												John Anderson
-											</h6>
-											<span class="font-[Roboto] text-base font-medium text-[#555555]">
-												CEO at Innovate Solutions
-											</span>
-										</div>
-									</div>
-									<p class="font-[Roboto] text-lg font-normal leading-7 text-[#1E1E1E]">
-										"Their attention to detail and creative design approach transformed our website
-										into a visually stunning and highly functional platform. We’ve seen a 30%
-										increase in traffic since the relaunch. I highly recommend them to anyone
-										seeking professional web design services!"
-									</p>
-								</div>
-							</SplideSlide>
-							<SplideSlide>
-								<div
-									class="flex w-[450px] flex-col flex-wrap gap-3 rounded-none bg-white p-10 shadow-[rgba(0,0,0,0.05)] lg:w-[600px] lg:rounded-xl"
-								>
-									<div class="flex flex-row gap-3.5">
-										<div class="avatar">
-											<div class="w-20 rounded-full">
-												<img
-													src="https://img.daisyui.com/images/profile/demo/superperson@192.webp"
-													alt="Tailwind-CSS-Avatar-component"
-												/>
-											</div>
-										</div>
-										<div class="flex flex-col gap-1">
-											<h6 class="font-[Roboto] text-2xl font-extrabold text-[#2AAE5C]">
-												John Anderson
-											</h6>
-											<span class="font-[Roboto] text-base font-medium text-[#555555]">
-												CEO at Innovate Solutions
-											</span>
-										</div>
-									</div>
-									<p class="font-[Roboto] text-lg font-normal leading-7 text-[#1E1E1E]">
-										"Their attention to detail and creative design approach transformed our website
-										into a visually stunning and highly functional platform. We’ve seen a 30%
-										increase in traffic since the relaunch. I highly recommend them to anyone
-										seeking professional web design services!"
-									</p>
-								</div>
-							</SplideSlide>
-							<SplideSlide>
-								<div
-									class="flex w-[450px] flex-col flex-wrap gap-3 rounded-none bg-white p-10 shadow-[rgba(0,0,0,0.05)] lg:w-[600px] lg:rounded-xl"
-								>
-									<div class="flex flex-row gap-3.5">
-										<div class="avatar">
-											<div class="w-20 rounded-full">
-												<img
-													src="https://img.daisyui.com/images/profile/demo/superperson@192.webp"
-													alt="Tailwind-CSS-Avatar-component"
-												/>
-											</div>
-										</div>
-										<div class="flex flex-col gap-1">
-											<h6 class="font-[Roboto] text-2xl font-extrabold text-[#2AAE5C]">
-												John Anderson
-											</h6>
-											<span class="font-[Roboto] text-base font-medium text-[#555555]">
-												CEO at Innovate Solutions
-											</span>
-										</div>
-									</div>
-									<p class="font-[Roboto] text-lg font-normal leading-7 text-[#1E1E1E]">
-										"Their attention to detail and creative design approach transformed our website
-										into a visually stunning and highly functional platform. We’ve seen a 30%
-										increase in traffic since the relaunch. I highly recommend them to anyone
-										seeking professional web design services!"
-									</p>
-								</div>
-							</SplideSlide>
-						</SplideTrack>
-						<div class="z-100 flex w-full flex-col justify-center gap-8 lg:justify-normal">
-							<div class="flex flex-col gap-4">
-								<span
-									class="font-[Roboto] text-base font-medium uppercase leading-5 text-[rgba(42,174,92,1)]"
-								>
-									Testimonial
-								</span>
-								<h5
-									class="leading-14 text-center font-[Roboto] text-[36px] font-bold text-[rgba(30,30,30,1)] lg:text-left"
-								>
-									Client's Success Stories
-								</h5>
-							</div>
-							<div class="splide__arrows bottom-0 right-0 flex flex-row">
-								<button
-									class="btn btn-circle splide__arrow splide__arrow--prev !relative !left-0 -mb-4 ml-2.5 !size-10 !bg-[#E6E6E6] !opacity-100 hover:!bg-[#F4C952] md:!mb-0"
-									aria-label="control-left"
-								>
-									<svg
-										width="24"
-										height="24"
-										viewBox="0 0 24 24"
-										fill="currentColor"
-										xmlns="http://www.w3.org/2000/svg"
-										class="!size-7 text-black"
-									>
-										<path
-											d="M13.2328 16.4569C12.9328 16.7426 12.9212 17.2173 13.2069 17.5172C13.4926 17.8172 13.9673 17.8288 14.2672 17.5431L13.75 17L13.2328 16.4569ZM19.5172 12.5431C19.8172 12.2574 19.8288 11.7827 19.5431 11.4828C19.2574 11.1828 18.7827 11.1712 18.4828 11.4569L19 12L19.5172 12.5431ZM18.4828 12.5431C18.7827 12.8288 19.2574 12.8172 19.5431 12.5172C19.8288 12.2173 19.8172 11.7426 19.5172 11.4569L19 12L18.4828 12.5431ZM14.2672 6.4569C13.9673 6.17123 13.4926 6.18281 13.2069 6.48276C12.9212 6.78271 12.9328 7.25744 13.2328 7.5431L13.75 7L14.2672 6.4569ZM19 12.75C19.4142 12.75 19.75 12.4142 19.75 12C19.75 11.5858 19.4142 11.25 19 11.25V12V12.75ZM5 11.25C4.58579 11.25 4.25 11.5858 4.25 12C4.25 12.4142 4.58579 12.75 5 12.75V12V11.25ZM13.75 17L14.2672 17.5431L19.5172 12.5431L19 12L18.4828 11.4569L13.2328 16.4569L13.75 17ZM19 12L19.5172 11.4569L14.2672 6.4569L13.75 7L13.2328 7.5431L18.4828 12.5431L19 12ZM19 12V11.25L5 11.25V12V12.75L19 12.75V12Z"
-											fill="currentColor"
-										/>
-									</svg>
-								</button>
-								<button
-									class="btn btn-circle splide__arrow splide__arrow--next !relative !left-0 ml-2.5 !size-10 !bg-[#E6E6E6] !opacity-100 hover:!bg-[#F4C952]"
-									aria-label="control-right"
-								>
-									<svg
-										viewBox="0 0 24 24"
-										fill="currentColor"
-										xmlns="http://www.w3.org/2000/svg"
-										aria-hidden="true"
-										class="!size-7 text-black"
-									>
-										<path
-											d="M13.2328 16.4569C12.9328 16.7426 12.9212 17.2173 13.2069 17.5172C13.4926 17.8172 13.9673 17.8288 14.2672 17.5431L13.75 17L13.2328 16.4569ZM19.5172 12.5431C19.8172 12.2574 19.8288 11.7827 19.5431 11.4828C19.2574 11.1828 18.7827 11.1712 18.4828 11.4569L19 12L19.5172 12.5431ZM18.4828 12.5431C18.7827 12.8288 19.2574 12.8172 19.5431 12.5172C19.8288 12.2173 19.8172 11.7426 19.5172 11.4569L19 12L18.4828 12.5431ZM14.2672 6.4569C13.9673 6.17123 13.4926 6.18281 13.2069 6.48276C12.9212 6.78271 12.9328 7.25744 13.2328 7.5431L13.75 7L14.2672 6.4569ZM19 12.75C19.4142 12.75 19.75 12.4142 19.75 12C19.75 11.5858 19.4142 11.25 19 11.25V12V12.75ZM5 11.25C4.58579 11.25 4.25 11.5858 4.25 12C4.25 12.4142 4.58579 12.75 5 12.75V12V11.25ZM13.75 17L14.2672 17.5431L19.5172 12.5431L19 12L18.4828 11.4569L13.2328 16.4569L13.75 17ZM19 12L19.5172 11.4569L14.2672 6.4569L13.75 7L13.2328 7.5431L18.4828 12.5431L19 12ZM19 12V11.25L5 11.25V12V12.75L19 12.75V12Z"
-											fill="currentColor"
-										/>
-									</svg>
-								</button>
-							</div>
-						</div>
-					</div>
-				</Splide>
-			</div>
-		</div>
-	</section>
+	<Testimonials />
 
 	<!-- Mobile App Download Section -->
-	<section
-		class="pt-25.5 px-15 gap-18 container relative mx-auto mt-20 flex w-full flex-col justify-between rounded-[20px] bg-[#2AAE5C] lg:flex-row lg:gap-0"
-	>
-		<div class="flex flex-col justify-start gap-6">
-			<h2 class="leading-12 text-left font-[Roboto] text-4xl font-bold text-white">
-				Download our mobile app
-			</h2>
-			<div class="flex flex-col justify-center gap-4 sm:flex-row sm:justify-normal sm:gap-6">
-				<a href="/"><img class="h-12.5" src={AppstoreLogo} alt="" /></a>
-				<a href="/"><img class="h-12.5" src={PlaystoreLogo} alt="" /></a>
-			</div>
-		</div>
-
-		<div
-			class="relative bottom-0 flex h-[142px] w-full justify-center rounded-t-[200px] bg-[#F4C952] lg:h-[204px] lg:w-[702px]"
-		>
-			<img
-				src={AppPhoneMockup}
-				class="-mt-20 h-24 md:-mt-28 md:h-[248px] lg:-mt-36 lg:h-[348px]"
-				alt="App Phone Mockup"
-			/>
-		</div>
-	</section>
+	<MobileAppBanner />
 
 	<!-- Popular Search Section -->
-	<section
-		class="relative flex w-full flex-col items-center justify-between gap-10 bg-white px-10 py-20"
-	>
-		<h2 class="leading-12 text-center font-[Roboto] text-4xl font-bold text-[#333333]">
-			Popular Search in <span class="text-primary">Africa</span>
-		</h2>
-		<div class="grid grid-flow-row grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
-			{#each Array.from({ length: 4 }) as _, i}
-				{#each popularSearches as search}
-					<a
-						href={search.link}
-						class="link link-hover font-[Roboto] text-lg font-normal text-[#333333]"
-						>{search.keyword}</a
-					>
-				{/each}
-			{/each}
-		</div>
-	</section>
+	<PopularSearch />
 </main>

@@ -23,7 +23,7 @@
 	];
 </script>
 
-<main class="mt-24 w-full bg-white">
+<main class="mb-16 mt-24 w-full bg-white">
 	<!-- About Hero Section -->
 	<section
 		class="hero bg-linear-to-r lg:px-45 flex h-[1000px] w-full flex-col items-start justify-center gap-8 from-white to-transparent bg-cover bg-center px-10 py-10 sm:h-[800px] sm:px-20 md:px-40"
@@ -138,10 +138,10 @@
 							style="background-image: url({category.image});"
 						>
 							<div
-								class="p-10.5 bg-linear-to-b absolute flex w-[302px] flex-col gap-2 from-[#D9D9D900] to-[#000000]"
+								class="p-10.5 bg-linear-to-b absolute flex w-[302px] flex-col from-[#D9D9D900] to-[#000000]"
 							>
 								<h4 class="font-[Roboto] text-3xl font-bold text-white">{category.figures}</h4>
-								<span class="font-[Roboto] text-2xl font-bold text-white">{category.title}</span>
+								<span class="font-[Roboto] text-[22px] font-bold text-white">{category.title}</span>
 							</div>
 						</div>
 					</SplideSlide>

@@ -1,4 +1,12 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		headerSnippet: Snippet;
+	}
+
+	let { headerSnippet }: Props = $props();
+
 	import goworkLogo from '$lib/assets/gowork-logo.png';
 
 	let isMobileMenuOpen: boolean = $state(false);
@@ -16,20 +24,11 @@
 			<a href="/"><img src={goworkLogo} class="h-8 sm:h-12" alt="" /></a>
 		</div>
 		<div class="flex-end hidden flex-row justify-between gap-2.5 md:flex">
-			<a
-				href="/"
-				class="btn btn-primary btn-outline btn-lg px-7.5 rounded-xl py-4 font-[Roboto] text-lg font-medium tracking-wide"
-				>Offer My Service</a
-			>
-			<a
-				href="/"
-				class="btn btn-primary btn-lg px-7.5 rounded-xl py-4 font-[Roboto] text-lg font-medium tracking-wide"
-				>Request a Service</a
-			>
+			{@render headerSnippet()}
 		</div>
 		<div class="flex md:hidden">
 			<button
-				class="btn btn-lg btn-ghost rounded-xl px-2 py-2"
+				class="btn btn-primary btn-lg btn-ghost rounded-xl px-2 py-2"
 				onclick={handleMobileMenu}
 				aria-label="humburger"
 			>
@@ -67,16 +66,7 @@
 	</div>
 	{#if isMobileMenuOpen === true}
 		<div class="top-24 m-8 flex flex-col justify-center gap-2.5">
-			<a
-				href="/"
-				class="btn btn-primary btn-outline btn-lg px-7.5 rounded-xl py-4 font-[Roboto] text-lg font-medium tracking-wide"
-				>Offer My Service</a
-			>
-			<a
-				href="/"
-				class="btn btn-primary btn-lg px-7.5 rounded-xl py-4 font-[Roboto] text-lg font-medium tracking-wide"
-				>Request a Service</a
-			>
+			{@render headerSnippet()}
 		</div>
 	{/if}
 </header>
