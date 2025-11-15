@@ -1,11 +1,16 @@
 <script lang="ts">
 	import '$lib/styles/app.css';
+
 	import favicon from '$lib/assets/favicon.svg';
+
+	import { page } from '$app/state';
 
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
-	let { children } = $props();
+	import LinkButton from '$lib/components/shared/LinkButton.svelte';
+
+	let { children }: { children: any } = $props();
 </script>
 
 <svelte:head>
@@ -23,7 +28,48 @@
 	<title>GoWork</title>
 </svelte:head>
 
-<Header />
+<Header>
+	{#snippet headerSnippet()}
+		{#if page.url.pathname !== '/'}
+			<LinkButton
+				title="Request a Service"
+				link="/sign-up/talent-seeker"
+				className="btn-primary text-lg font-medium tracking-wide btn-lg!"
+			/>
+
+			{#if page.url.pathname !== '/login'}
+				<LinkButton
+					title="Login"
+					link="/login"
+					isOutline={true}
+					className="text-lg btn-primary font-medium tracking-wide btn-lg!"
+				/>
+			{/if}
+			{#if !page.url.pathname.startsWith('/sign-up')}
+				<LinkButton
+					title="Register"
+					link="/sign-up"
+					isOutline={true}
+					className="text-lg btn-primary font-medium tracking-wide btn-lg!"
+				/>
+			{/if}
+		{:else}
+			{#if !page.url.pathname.startsWith('/sign-up')}
+				<LinkButton
+					title="Offer My Service"
+					link="/sign-up/provider"
+					isOutline={true}
+					className="text-lg btn-primary font-medium tracking-wide btn-lg!"
+				/>
+			{/if}
+			<LinkButton
+				title="Request a Service"
+				link="/sign-up/talent-seeker"
+				className="text-lg btn-primary font-medium tracking-wide btn-lg!"
+			/>
+		{/if}
+	{/snippet}
+</Header>
 
 {@render children?.()}
 

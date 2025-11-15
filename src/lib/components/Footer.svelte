@@ -35,7 +35,7 @@
 		{
 			title: 'About',
 			links: [
-				{ name: 'GoWork', link: '/' },
+				{ name: 'GoWork', link: '/about' },
 				{ name: 'Our Team', link: '/' },
 				{ name: 'Jobs/Internship', link: '/' },
 				{ name: 'Press Area', link: '/' }
@@ -44,7 +44,7 @@
 	];
 </script>
 
-<footer class="!text-base-content bg-[#F2F2F280] px-6 pb-10 pt-16 sm:px-28">
+<footer class="!text-base-content mt-20 bg-[#F2F2F280] px-6 pb-10 pt-16 sm:px-28">
 	<div class="footer grid grid-cols-1 justify-between lg:grid-cols-2 xl:grid-cols-4">
 		{#each navs as nav}
 			<nav class="gap-4">
